@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>rpn_manual.nim</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🐳</text></svg>">
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.3.12" name="generator">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/pietroppeter/nimib/assets/atom-one-light.css'>
+    <script src="https://cdn.jsdelivr.net/gh/pietroppeter/nimib@main/assets/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+</head>
+<body>
+<header>
+<div class="nb-box">
+  <span><a href=".">🏡</a></span>
+  <span><code>rpn_manual.nim</code></span>
+  <span></span>
+</div>
+<hr>
+</header><main>
+<h1>RPN 计算器使用手册</h1>
+<h2>项目概述</h2>
+<p>这是一个功能完整的<strong>逆波兰表示法（Reverse Polish Notation, RPN）计算器</strong>，使用C++编写。
+RPN是一种无需括号的数学表达式表示方法，操作符位于操作数之后。</p>
+<p><strong>版本</strong>: v1.0<br />
+**作者**: [Your Name]<br />
+<strong>日期</strong>: 2025年9月</p>
+<hr />
+<h2>什么是RPN？</h2>
+<p>在逆波兰表示法中，运算符跟在操作数后面。例如：</p>
+<ul>
+<li>中缀表达式: <code>(5 + 3) * 2</code></li>
+<li>RPN表达式: <code>5 3 + 2 *</code></li>
+</ul>
+<h3>计算过程示例</h3>
+<p>对于表达式 <code>5 3 + 2 *</code>:</p>
+<ol>
+<li>将 5 压入栈</li>
+<li>将 3 压入栈</li>
+<li>遇到 <code>+</code>，弹出 3 和 5，计算 5+3=8，将 8 压入栈</li>
+<li>将 2 压入栈</li>
+<li>遇到 <code>*</code>，弹出 2 和 8，计算 8*2=16，将 16 压入栈</li>
+<li>最终结果: 16</li>
+</ol>
+<hr />
+<h2>安装和编译指南</h2>
+<h3>系统要求</h3>
+<ul>
+<li>C++编译器 (GCC 5.0+ 或 Clang 3.5+)</li>
+<li>操作系统: Linux, macOS, 或 Windows</li>
+</ul>
+<h3>编译步骤</h3>
+<h4>Linux/macOS</h4>
+<pre><code class="language-bash"># 进入项目目录
+cd rpn_calc
+
+# 编译源代码
+g++ rpn_calc.cpp -o rpn_calc -std=c++11
+
+# 运行程序
+./rpn_calc
+</code></pre>
+<h4>Windows</h4>
+<pre><code class="language-cmd"># 使用 MinGW 或 MSVC
+g++ rpn_calc.cpp -o rpn_calc.exe -std=c++11
+
+# 运行
+rpn_calc.exe
+</code></pre>
+<h3>编译选项说明</h3>
+<ul>
+<li><code>-std=c++11</code>: 使用C++11标准</li>
+<li><code>-o rpn_calc</code>: 指定输出文件名</li>
+<li><code>-O2</code>: (可选) 开启优化</li>
+</ul>
+<hr />
+<h2>基本使用</h2>
+<h3>启动程序</h3>
+<p>运行程序后会看到欢迎界面：</p>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  ==================================
+      C++ RPN 计算器 v1.0
+  ==================================
+  输入表达式 (例: '5 5 +'), 或 'help' 查看帮助, 'q' 退出.
+  &gt;
+  &quot;&quot;&quot;</span></code></pre>
+<h3>简单示例</h3>
+<h4>示例1: 基本加法</h4>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 5 +
+  结果: 10.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h4>示例2: 复杂计算</h4>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 1 2 + 3 + 7 7 * +
+  结果: 55.000000
+  &quot;&quot;&quot;</span></code></pre>
+<p><strong>解析过程</strong>:</p>
+<ol>
+<li><code>1 2 +</code> → 3</li>
+<li><code>3 3 +</code> → 6</li>
+<li><code>7 7 *</code> → 49</li>
+<li><code>6 49 +</code> → 55</li>
+</ol>
+<hr />
+<h2>支持的操作</h2>
+<h3>基本算术运算</h3>
+<table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>说明</th>
+<th>示例</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>加法</td>
+<td><code>5 3 +</code></td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>减法</td>
+<td><code>10 3 -</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>乘法</td>
+<td><code>4 5 *</code></td>
+<td>20</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>除法</td>
+<td><code>20 4 /</code></td>
+<td>5</td>
+</tr></tbody></table>
+<h3>高级数学函数</h3>
+<table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>说明</th>
+<th>示例</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sqrt</code></td>
+<td>平方根</td>
+<td><code>16 sqrt</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>pow</code></td>
+<td>幂运算</td>
+<td><code>2 10 pow</code></td>
+<td>1024</td>
+</tr>
+<tr>
+<td><code>sin</code></td>
+<td>正弦函数 (弧度)</td>
+<td><code>1.5708 sin</code></td>
+<td>1.0</td>
+</tr>
+<tr>
+<td><code>cos</code></td>
+<td>余弦函数 (弧度)</td>
+<td><code>0 cos</code></td>
+<td>1.0</td>
+</tr>
+<tr>
+<td><code>tan</code></td>
+<td>正切函数 (弧度)</td>
+<td><code>0.7854 tan</code></td>
+<td>1.0</td>
+</tr></tbody></table>
+<h3>特殊操作符（高级功能）</h3>
+<h4>斐波那契数列 (<code>fib</code>)</h4>
+<p>计算斐波那契数列的第n项（从0开始）。</p>
+<p><strong>使用方法</strong>: <code>n fib</code></p>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 10 fib
+  结果: 55.000000
+  
+  &gt; 15 fib
+  结果: 610.000000
+  &quot;&quot;&quot;</span></code></pre>
+<p><strong>斐波那契数列</strong>: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...</p>
+<h4>杨辉三角 (<code>pascal</code>)</h4>
+<p>计算杨辉三角（帕斯卡三角形）中第n行第k列的值，即组合数C(n,k)。</p>
+<p><strong>使用方法</strong>: <code>n k pascal</code></p>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 2 pascal
+  结果: 10.000000
+  
+  &gt; 10 5 pascal
+  结果: 252.000000
+  &quot;&quot;&quot;</span></code></pre>
+<p><strong>杨辉三角示例</strong>:</p>
+<pre><code>        1
+       1 1
+      1 2 1
+     1 3 3 1
+    1 4 6 4 1
+   1 5 10 10 5 1
+</code></pre>
+<p>C(5,2) = 10 表示第5行第2列的值</p>
+<h3>栈操作命令</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>display</code></td>
+<td>显示当前栈内容</td>
+<td><code>5 3 + display</code></td>
+</tr>
+<tr>
+<td><code>clear</code></td>
+<td>清空栈</td>
+<td><code>clear</code></td>
+</tr></tbody></table>
+<h3>其他命令</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>help</code> 或 <code>h</code></td>
+<td>显示帮助信息</td>
+</tr>
+<tr>
+<td><code>history</code></td>
+<td>显示计算历史</td>
+</tr>
+<tr>
+<td><code>q</code>, <code>quit</code>, <code>exit</code></td>
+<td>退出程序</td>
+</tr></tbody></table>
+<hr />
+<h2>详细使用示例</h2>
+<h3>示例1: 四则运算组合</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 15 7 1 1 + - / 3 * 2 1 1 + + -
+  结果: 5.000000
+  &quot;&quot;&quot;</span></code></pre>
+<p><strong>计算过程</strong>:</p>
+<ul>
+<li><code>15 7 1 1 + - /</code> → 15 / (7-(1+1)) = 15 / 5 = 3</li>
+<li><code>3 3 *</code> → 9</li>
+<li><code>2 1 1 + +</code> → 4</li>
+<li><code>9 4 -</code> → 5</li>
+</ul>
+<h3>示例2: 使用三角函数</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 3.14159 2 / sin
+  结果: 1.000000
+  
+  &gt; 0 cos
+  结果: 1.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h3>示例3: 幂运算</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 2 8 pow
+  结果: 256.000000
+  
+  &gt; 5 3 pow
+  结果: 125.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h3>示例4: 斐波那契数列计算</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 20 fib
+  结果: 6765.000000
+  
+  &gt; 0 fib
+  结果: 0.000000
+  
+  &gt; 1 fib
+  结果: 1.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h3>示例5: 杨辉三角计算</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 10 3 pascal
+  结果: 120.000000
+  
+  &gt; 6 3 pascal
+  结果: 20.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h3>示例6: 使用栈操作</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 3 display
+  当前栈内容 (栈顶 -&gt; 栈底): 3 5
+  
+  &gt; + display
+  当前栈内容 (栈顶 -&gt; 栈底): 8
+  
+  &gt; clear
+  栈已清空
+  &quot;&quot;&quot;</span></code></pre>
+<hr />
+<h2>错误处理</h2>
+<h3>错误代码和说明</h3>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>错误信息</th>
+<th>原因</th>
+<th>解决方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>栈空错误</td>
+<td><code>错误: 栈为空</code></td>
+<td>操作数不足</td>
+<td>确保有足够的操作数</td>
+</tr>
+<tr>
+<td>除零错误</td>
+<td><code>错误: 除数不能为零</code></td>
+<td>除法运算中除数为0</td>
+<td>避免除以零</td>
+</tr>
+<tr>
+<td>格式错误</td>
+<td><code>错误: 未知操作符</code></td>
+<td>输入了不支持的操作符</td>
+<td>检查拼写和支持的操作符列表</td>
+</tr>
+<tr>
+<td>负数开方</td>
+<td><code>错误: 负数没有实数平方根</code></td>
+<td>对负数求平方根</td>
+<td>使用非负数</td>
+</tr>
+<tr>
+<td>参数错误</td>
+<td><code>错误: 斐波那契数列索引必须非负</code></td>
+<td>fib操作的参数为负数</td>
+<td>使用非负整数</td>
+</tr>
+<tr>
+<td>参数错误</td>
+<td><code>错误: 杨辉三角参数无效</code></td>
+<td>pascal操作的参数不合法</td>
+<td>确保 0 ≤ k ≤ n</td>
+</tr></tbody></table>
+<h3>错误示例</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 0 /
+  错误: 除数不能为零
+  
+  &gt; + 
+  错误: 栈为空
+  
+  &gt; 5 abc
+  错误: 未知操作符 'abc'
+  
+  &gt; -16 sqrt
+  错误: 负数没有实数平方根
+  
+  &gt; -5 fib
+  错误: 斐波那契数列索引必须非负
+  &quot;&quot;&quot;</span></code></pre>
+<hr />
+<h2>进阶技巧</h2>
+<h3>1. 批量计算</h3>
+<p>可以在一行中输入多个完整的计算：</p>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 5 + 10 10 + *
+  结果: 200.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h3>2. 使用历史记录</h3>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 3 +
+  结果: 8.000000
+  
+  &gt; 10 2 *
+  结果: 20.000000
+  
+  &gt; history
+  === 计算历史 ===
+  1. 5 3 + = 8.000000
+  2. 10 2 * = 20.000000
+  &quot;&quot;&quot;</span></code></pre>
+<h3>3. 组合高级功能</h3>
+<p>计算斐波那契数列的平方：</p>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 10 fib 2 pow
+  结果: 3025.000000
+  &quot;&quot;&quot;</span></code></pre>
+<p>计算组合数的和：</p>
+<pre><code class="nohighlight hljs nim"><span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 2 pascal 5 3 pascal +
+  结果: 20.000000
+  &quot;&quot;&quot;</span></code></pre>
+<hr />
+<h2>最佳实践</h2>
+<ol>
+<li><strong>从简单开始</strong>: 先测试基本的加减乘除，熟悉RPN语法</li>
+<li><strong>使用display命令</strong>: 在复杂计算中使用<code>display</code>查看栈状态</li>
+<li><strong>分步计算</strong>: 将复杂表达式分解成多个简单步骤</li>
+<li><strong>检查输入</strong>: 确保每个操作符有足够的操作数</li>
+<li><strong>使用clear</strong>: 出错后使用<code>clear</code>清空栈重新开始</li>
+</ol>
+<hr />
+<h2>常见问题</h2>
+<h3>Q: 为什么我的结果是小数而不是整数？</h3>
+<p>A: 计算器内部使用双精度浮点数（double），所有结果都显示为浮点格式。</p>
+<h3>Q: 如何输入负数？</h3>
+<p>A: 直接输入负号和数字，如 <code>-5 3 +</code></p>
+<h3>Q: 三角函数使用什么单位？</h3>
+<p>A: 所有三角函数使用<strong>弧度</strong>作为输入单位。90度 = π/2 ≈ 1.5708 弧度</p>
+<h3>Q: fib和pascal操作符有什么实际用途？</h3>
+<p>A:</p>
+<ul>
+<li><strong>fib</strong>: 斐波那契数列在自然界、艺术和计算机科学中有广泛应用</li>
+<li><strong>pascal</strong>: 杨辉三角用于组合数学、概率论和二项式展开</li>
+</ul>
+<h3>Q: 计算器支持的最大数字是多少？</h3>
+<p>A: 受限于double类型，约为 ±1.7 × 10^308</p>
+<hr />
+<h2>技术细节</h2>
+<h3>实现原理</h3>
+<ul>
+<li>使用STL的<code>stack</code>容器实现数据栈</li>
+<li>使用<code>stringstream</code>进行输入解析</li>
+<li>异常处理机制保证程序健壮性</li>
+</ul>
+<h3>性能特点</h3>
+<ul>
+<li>时间复杂度: O(n)，n为token数量</li>
+<li>空间复杂度: O(m)，m为最大栈深度</li>
+<li>斐波那契计算优化为O(n)迭代算法</li>
+<li>杨辉三角使用优化的组合数计算方法</li>
+</ul>
+<hr />
+<h2>版本更新日志</h2>
+<h3>v1.0 (2025-09)</h3>
+<ul>
+<li>✅ 实现基本四则运算</li>
+<li>✅ 实现高级数学函数（sqrt, pow, sin, cos, tan）</li>
+<li>✅ 新增斐波那契数列计算 (fib操作符)</li>
+<li>✅ 新增杨辉三角计算 (pascal操作符)</li>
+<li>✅ 完善错误处理机制</li>
+<li>✅ 添加计算历史记录功能</li>
+<li>✅ 优化用户界面和帮助信息</li>
+</ul>
+<hr />
+<h2>联系方式</h2>
+<ul>
+<li><strong>项目主页</strong>: [GitHub Repository URL]</li>
+<li><strong>问题反馈</strong>: [Issues URL]</li>
+<li><strong>文档</strong>: [GitHub Pages URL]</li>
+</ul>
+<hr />
+<h2>许可证</h2>
+<p>本项目采用 MIT 许可证。</p>
+<hr />
+<p><strong>感谢使用 RPN 计算器！</strong></p>
+</main>
+<footer>
+<div class="nb-box">
+  <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+  <span></span>
+  <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">import</span> nimib
+
+nbInit
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+# RPN 计算器使用手册
+
+## 项目概述
+
+这是一个功能完整的**逆波兰表示法（Reverse Polish Notation, RPN）计算器**，使用C++编写。
+RPN是一种无需括号的数学表达式表示方法，操作符位于操作数之后。
+
+**版本**: v1.0  
+**作者**: [Your Name]  
+**日期**: 2025年9月
+
+---
+
+## 什么是RPN？
+
+在逆波兰表示法中，运算符跟在操作数后面。例如：
+- 中缀表达式: `(5 + 3) * 2`
+- RPN表达式: `5 3 + 2 *`
+
+### 计算过程示例
+
+对于表达式 `5 3 + 2 *`:
+1. 将 5 压入栈
+2. 将 3 压入栈
+3. 遇到 `+`，弹出 3 和 5，计算 5+3=8，将 8 压入栈
+4. 将 2 压入栈
+5. 遇到 `*`，弹出 2 和 8，计算 8*2=16，将 16 压入栈
+6. 最终结果: 16
+
+---
+
+## 安装和编译指南
+
+### 系统要求
+- C++编译器 (GCC 5.0+ 或 Clang 3.5+)
+- 操作系统: Linux, macOS, 或 Windows
+
+### 编译步骤
+
+#### Linux/macOS
+```bash
+# 进入项目目录
+cd rpn_calc
+
+# 编译源代码
+g++ rpn_calc.cpp -o rpn_calc -std=c++11
+
+# 运行程序
+./rpn_calc
+```
+
+#### Windows
+```cmd
+# 使用 MinGW 或 MSVC
+g++ rpn_calc.cpp -o rpn_calc.exe -std=c++11
+
+# 运行
+rpn_calc.exe
+```
+
+### 编译选项说明
+- `-std=c++11`: 使用C++11标准
+- `-o rpn_calc`: 指定输出文件名
+- `-O2`: (可选) 开启优化
+
+---
+
+## 基本使用
+
+### 启动程序
+
+运行程序后会看到欢迎界面：
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  ==================================
+      C++ RPN 计算器 v1.0
+  ==================================
+  输入表达式 (例: '5 5 +'), 或 'help' 查看帮助, 'q' 退出.
+  &gt;
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 简单示例
+
+#### 示例1: 基本加法
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 5 +
+  结果: 10.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+#### 示例2: 复杂计算
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 1 2 + 3 + 7 7 * +
+  结果: 55.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+**解析过程**:
+1. `1 2 +` → 3
+2. `3 3 +` → 6
+3. `7 7 *` → 49
+4. `6 49 +` → 55
+
+---
+
+## 支持的操作
+
+### 基本算术运算
+
+| 操作符 | 说明 | 示例 | 结果 |
+|--------|------|------|------|
+| `+` | 加法 | `5 3 +` | 8 |
+| `-` | 减法 | `10 3 -` | 7 |
+| `*` | 乘法 | `4 5 *` | 20 |
+| `/` | 除法 | `20 4 /` | 5 |
+
+### 高级数学函数
+
+| 操作符 | 说明 | 示例 | 结果 |
+|--------|------|------|------|
+| `sqrt` | 平方根 | `16 sqrt` | 4 |
+| `pow` | 幂运算 | `2 10 pow` | 1024 |
+| `sin` | 正弦函数 (弧度) | `1.5708 sin` | 1.0 |
+| `cos` | 余弦函数 (弧度) | `0 cos` | 1.0 |
+| `tan` | 正切函数 (弧度) | `0.7854 tan` | 1.0 |
+
+### 特殊操作符（高级功能）
+
+#### 斐波那契数列 (`fib`)
+计算斐波那契数列的第n项（从0开始）。
+
+**使用方法**: `n fib`
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 10 fib
+  结果: 55.000000
+  
+  &gt; 15 fib
+  结果: 610.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+**斐波那契数列**: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
+
+#### 杨辉三角 (`pascal`)
+计算杨辉三角（帕斯卡三角形）中第n行第k列的值，即组合数C(n,k)。
+
+**使用方法**: `n k pascal`
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 2 pascal
+  结果: 10.000000
+  
+  &gt; 10 5 pascal
+  结果: 252.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+**杨辉三角示例**:
+```
+        1
+       1 1
+      1 2 1
+     1 3 3 1
+    1 4 6 4 1
+   1 5 10 10 5 1
+```
+C(5,2) = 10 表示第5行第2列的值
+
+### 栈操作命令
+
+| 命令 | 说明 | 示例 |
+|------|------|------|
+| `display` | 显示当前栈内容 | `5 3 + display` |
+| `clear` | 清空栈 | `clear` |
+
+### 其他命令
+
+| 命令 | 说明 |
+|------|------|
+| `help` 或 `h` | 显示帮助信息 |
+| `history` | 显示计算历史 |
+| `q`, `quit`, `exit` | 退出程序 |
+
+---
+
+## 详细使用示例
+
+### 示例1: 四则运算组合
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 15 7 1 1 + - / 3 * 2 1 1 + + -
+  结果: 5.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+**计算过程**:
+- `15 7 1 1 + - /` → 15 / (7-(1+1)) = 15 / 5 = 3
+- `3 3 *` → 9
+- `2 1 1 + +` → 4
+- `9 4 -` → 5
+
+### 示例2: 使用三角函数
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 3.14159 2 / sin
+  结果: 1.000000
+  
+  &gt; 0 cos
+  结果: 1.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 示例3: 幂运算
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 2 8 pow
+  结果: 256.000000
+  
+  &gt; 5 3 pow
+  结果: 125.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 示例4: 斐波那契数列计算
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 20 fib
+  结果: 6765.000000
+  
+  &gt; 0 fib
+  结果: 0.000000
+  
+  &gt; 1 fib
+  结果: 1.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 示例5: 杨辉三角计算
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 10 3 pascal
+  结果: 120.000000
+  
+  &gt; 6 3 pascal
+  结果: 20.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 示例6: 使用栈操作
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 3 display
+  当前栈内容 (栈顶 -&gt; 栈底): 3 5
+  
+  &gt; + display
+  当前栈内容 (栈顶 -&gt; 栈底): 8
+  
+  &gt; clear
+  栈已清空
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+---
+
+## 错误处理
+
+### 错误代码和说明
+
+| 错误类型 | 错误信息 | 原因 | 解决方法 |
+|----------|----------|------|----------|
+| 栈空错误 | `错误: 栈为空` | 操作数不足 | 确保有足够的操作数 |
+| 除零错误 | `错误: 除数不能为零` | 除法运算中除数为0 | 避免除以零 |
+| 格式错误 | `错误: 未知操作符` | 输入了不支持的操作符 | 检查拼写和支持的操作符列表 |
+| 负数开方 | `错误: 负数没有实数平方根` | 对负数求平方根 | 使用非负数 |
+| 参数错误 | `错误: 斐波那契数列索引必须非负` | fib操作的参数为负数 | 使用非负整数 |
+| 参数错误 | `错误: 杨辉三角参数无效` | pascal操作的参数不合法 | 确保 0 ≤ k ≤ n |
+
+### 错误示例
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 0 /
+  错误: 除数不能为零
+  
+  &gt; + 
+  错误: 栈为空
+  
+  &gt; 5 abc
+  错误: 未知操作符 'abc'
+  
+  &gt; -16 sqrt
+  错误: 负数没有实数平方根
+  
+  &gt; -5 fib
+  错误: 斐波那契数列索引必须非负
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+---
+
+## 进阶技巧
+
+### 1. 批量计算
+可以在一行中输入多个完整的计算：
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 5 + 10 10 + *
+  结果: 200.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 2. 使用历史记录
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 3 +
+  结果: 8.000000
+  
+  &gt; 10 2 *
+  结果: 20.000000
+  
+  &gt; history
+  === 计算历史 ===
+  1. 5 3 + = 8.000000
+  2. 10 2 * = 20.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### 3. 组合高级功能
+计算斐波那契数列的平方：
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 10 fib 2 pow
+  结果: 3025.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+计算组合数的和：
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> <span class="hljs-string">&quot;&quot;&quot;
+  &gt; 5 2 pascal 5 3 pascal +
+  结果: 20.000000
+  &quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+---
+
+## 最佳实践
+
+1. **从简单开始**: 先测试基本的加减乘除，熟悉RPN语法
+2. **使用display命令**: 在复杂计算中使用`display`查看栈状态
+3. **分步计算**: 将复杂表达式分解成多个简单步骤
+4. **检查输入**: 确保每个操作符有足够的操作数
+5. **使用clear**: 出错后使用`clear`清空栈重新开始
+
+---
+
+## 常见问题
+
+### Q: 为什么我的结果是小数而不是整数？
+A: 计算器内部使用双精度浮点数（double），所有结果都显示为浮点格式。
+
+### Q: 如何输入负数？
+A: 直接输入负号和数字，如 `-5 3 +`
+
+### Q: 三角函数使用什么单位？
+A: 所有三角函数使用**弧度**作为输入单位。90度 = π/2 ≈ 1.5708 弧度
+
+### Q: fib和pascal操作符有什么实际用途？
+A: 
+- **fib**: 斐波那契数列在自然界、艺术和计算机科学中有广泛应用
+- **pascal**: 杨辉三角用于组合数学、概率论和二项式展开
+
+### Q: 计算器支持的最大数字是多少？
+A: 受限于double类型，约为 ±1.7 × 10^308
+
+---
+
+## 技术细节
+
+### 实现原理
+- 使用STL的`stack`容器实现数据栈
+- 使用`stringstream`进行输入解析
+- 异常处理机制保证程序健壮性
+
+### 性能特点
+- 时间复杂度: O(n)，n为token数量
+- 空间复杂度: O(m)，m为最大栈深度
+- 斐波那契计算优化为O(n)迭代算法
+- 杨辉三角使用优化的组合数计算方法
+
+---
+
+## 版本更新日志
+
+### v1.0 (2025-09)
+- ✅ 实现基本四则运算
+- ✅ 实现高级数学函数（sqrt, pow, sin, cos, tan）
+- ✅ 新增斐波那契数列计算 (fib操作符)
+- ✅ 新增杨辉三角计算 (pascal操作符)
+- ✅ 完善错误处理机制
+- ✅ 添加计算历史记录功能
+- ✅ 优化用户界面和帮助信息
+
+---
+
+## 联系方式
+
+- **项目主页**: [GitHub Repository URL]
+- **问题反馈**: [Issues URL]
+- **文档**: [GitHub Pages URL]
+
+---
+
+## 许可证
+
+本项目采用 MIT 许可证。
+
+---
+
+**感谢使用 RPN 计算器！**
+&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section><script>
+function toggleSourceDisplay() {
+  var btn = document.getElementById("show")
+  var source = document.getElementById("source");
+  if (btn.innerHTML=="Show Source") {
+    btn.innerHTML = "Hide Source";
+    source.style.display = "block";
+  } else {
+    btn.innerHTML = "Show Source";
+    source.style.display = "none";
+  }
+}
+</script></body>
+</html>
